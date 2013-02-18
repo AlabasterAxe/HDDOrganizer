@@ -1,5 +1,6 @@
 #include "tagtreeview.h"
 #include <QDragMoveEvent>
+#include <QMimeData>
 
 TagTreeView::TagTreeView(QWidget *parent) :
     QTreeView(parent)
