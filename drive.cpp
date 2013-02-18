@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QImage>
 #include <QDateTime>
+#include <QTextStream>
 
 Drive::Drive(QString dir): columns_(4)
 {
@@ -12,7 +13,7 @@ Drive::Drive(QString dir): columns_(4)
     this->directory_ = new QDir(dir);
     this->results_ = this->directory_->entryInfoList(QDir::Files);
 
-    this->tagTree_ = new TagTreeModel;
+    this->tagTree_ = new TagTreeModel(dir);
 
     // Insert the 4 columns that represent:
     //   - Name
@@ -44,6 +45,16 @@ bool Drive::save(QString file) {
     // or if the file already exists.
     //
     // This function translates the underlying object in to XML
+
+    QString data = this->tagTree_->stringify();
+    QFile saveFile(file);
+
+    if (saveFile.open(QIODevice::WriteOnly)) {
+        QTextStream out(&saveFile);
+        out << data;
+        return true;
+    }
+
     return false;
 }
 

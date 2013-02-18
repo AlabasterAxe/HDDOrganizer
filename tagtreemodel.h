@@ -3,13 +3,15 @@
 
 #include <QAbstractItemModel>
 #include <QFileInfoList>
+
 class Tag;
+class QDomDocument;
 
 class TagTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit TagTreeModel(QObject *parent = 0);
+    explicit TagTreeModel(QString name, QObject *parent = 0);
     ~TagTreeModel();
     QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const;
     int rowCount(const QModelIndex & parent = QModelIndex()) const;
@@ -24,9 +26,11 @@ public:
     Tag* getIndexTag(const QModelIndex& index) const;
     bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent);
     QFileInfoList computeResult(QModelIndexList tags) const;
+    QString stringify() const;
 
 private:
     Tag* root_;
+    QDomDocument* domTree_;
 
 signals:
     

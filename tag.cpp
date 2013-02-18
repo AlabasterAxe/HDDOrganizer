@@ -2,22 +2,24 @@
 #include <iostream>
 
 #include <QVariant>
+#include <QDomNamedNodeMap>
 
-Tag::Tag(const QList<QVariant> &data, Tag* parent)
-{
-    this->parent_ = parent;
-    this->data_ = data;
-}
-
-bool Tag::addChild(const QString tagName) {
+bool Tag::addChild(const QString tagName, QDomElement* tagDomNode) {
     if (tagName.length() == 0)
         return false;
 
     QList<QVariant> data;
     data << tagName << 0;
-    Tag* tag = new Tag(data, this);
+    Tag* tag = new Tag(data, tagDomNode, this);
     this->children_.append(tag);
     return true;
+}
+
+Tag::Tag(const QList<QVariant> &data, QDomElement* domNode, Tag *parent)
+{
+    this->parent_ = parent;
+    this->data_ = data;
+    this->domNode_ = domNode;
 }
 
 Tag* Tag::child(int row) {
@@ -38,14 +40,21 @@ QVariant Tag::data(int column) const {
 
 bool Tag::addFiles(const QList<QUrl> files) {
     int urlQuantity = files.size();
+    QString fileAttribute = domNode_->attribute(QString("files"));
 
     for (int i = 0; i < urlQuantity; ++i) {
         if (files[i].isLocalFile()) {
             QString fileName = files[i].toLocalFile();
+            if (!files_.contains(fileName)) {
                 this->files_.insert(fileName);
                 this->setData(1,this->data(1).toInt()+1);
+                fileAttribute.append(fileName);
+                fileAttribute.append(QString("|"));
+            }
         }
     }
+
+    domNode_->setAttribute(QString("files"), fileAttribute);
     return true;
 }
 
@@ -54,8 +63,13 @@ bool Tag::setData(int column, QVariant value) {
     return true;
 }
 
-Tag* Tag::parent() {
+Tag* Tag::parent() const {
     return this->parent_;
+}
+
+QDomElement* Tag::domNodePointer() const
+{
+    return this->domNode_;
 }
 
 int Tag::row() {

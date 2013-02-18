@@ -4,17 +4,22 @@
 #include <QMimeData>
 #include <QStringList>
 #include <QUrl>
+#include <QDomDocument>
 
-TagTreeModel::TagTreeModel(QObject *parent) :
+TagTreeModel::TagTreeModel(QString name, QObject *parent) :
     QAbstractItemModel(parent)
 {
+    this->domTree_ = new QDomDocument(name);
+    // initialize the root node with the titles of the columns for the tree view
     QList<QVariant> data;
     data << "Tag" << "# of Files";
     this->root_ = new Tag(data);
+
 }
 
 TagTreeModel::~TagTreeModel() {
     delete root_;
+    delete domTree_;
 }
 
 QModelIndex TagTreeModel::index(int row, int column, const QModelIndex & parent) const {
@@ -116,11 +121,23 @@ bool TagTreeModel::setData(const QModelIndex &index, const QVariant &value,
 
 bool TagTreeModel::insertTag(const QString tagName, const QModelIndex& parent) {
     Tag* parentTag = getIndexTag(parent);
+    QDomNode* parentDomNode;
+
+    if (parentTag != this->root_) {
+        parentDomNode = parentTag->domNodePointer();
+    } else {
+        parentDomNode = this->domTree_;
+    }
+
     int position = parentTag->rowCount();
     bool result;
 
+    QDomElement tagDomNode = this->domTree_->createElement(tagName);
+    tagDomNode.setAttribute(QString("name"),tagName);
+
     beginInsertRows(parent, position, position);
-    result = parentTag->addChild(tagName);
+    result = parentTag->addChild(tagName, &tagDomNode);
+    parentDomNode->appendChild(tagDomNode);
     endInsertRows();
     return result;
 }
@@ -139,7 +156,10 @@ Tag* TagTreeModel::getIndexTag(const QModelIndex& index) const {
 bool TagTreeModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) {
     Tag* parentTag = getIndexTag(parent);
 
-    parentTag->addFiles(data->urls());
+    if (parentTag != this->root_)
+        parentTag->addFiles(data->urls());
+    else
+        return false;
 
     return true;
 }
@@ -160,4 +180,8 @@ QFileInfoList TagTreeModel::computeResult(QModelIndexList tags) const {
         files.append(QFileInfo(*i));
 
     return files;
+}
+
+QString TagTreeModel::stringify() const {
+    return this->domTree_->toString();
 }
