@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->selectDirectory();
 
     QObject::connect(this->ui->actionSelectDirectory,SIGNAL(triggered()),this,SLOT(selectDirectory()));
+    QObject::connect(this->ui->actionSave,SIGNAL(triggered()),this->drive_,SLOT(save()));
     QObject::connect(this->ui->pushButton,SIGNAL(pressed()),this,SLOT(addTag()));
     QObject::connect(this->ui->treeView,SIGNAL(clicked(const QModelIndex&)),this,SLOT(recalculate()));
     QObject::connect(this->drive_,SIGNAL(doneCalculating()),this->ui->tableView_2,SLOT(reset()));
@@ -76,7 +77,7 @@ void MainWindow::selectDirectory() {
     this->ui->treeView->setModel(this->drive_->tagTree_);
 
     QString filename = "CHANGE";
-    if(!this->drive_->load(filename)) {
+    if(!this->drive_->load()) {
         QString dialogMessage("No index file was found for this \"Drive\". Would you like to index it now?");
         QString dialogTitle("Index Drive?");
         if(this->notificationDialog_->notify(dialogMessage, dialogTitle)) {
@@ -90,7 +91,6 @@ void MainWindow::selectDirectory() {
 void MainWindow::addTag() {
     if(this->tagNameDialog_->exec()) {
         QModelIndexList selection = this->ui->treeView->selectionModel()->selectedIndexes();
-        std::cout << selection.count() << std::endl;
         if (selection.count() > 1*TAG_TREE_COLUMNS) {
             QString message = "Please select a single tag to create a child tag, and no tags to create a top level tag";
             this->ui->statusBar->showMessage(message, 1000);

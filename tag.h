@@ -16,8 +16,9 @@ public:
     int row();
     int rowCount() const;
     int columnCount() const;
-    bool addChild(QString tagName, QDomElement* tagDomNode);
+    Tag* addChild(QString tagName, QDomElement* tagDomNode);
     bool addFiles(const QList<QUrl> files);
+    bool setFiles(const QList<QString> files);
     QVariant data(int column) const;
     bool setData(int column, QVariant value);
     QSet<QString> allFiles();

@@ -5,6 +5,7 @@
 #include <QImage>
 #include <QDateTime>
 #include <QTextStream>
+#include <QDomNode>
 
 Drive::Drive(QString dir): columns_(4)
 {
@@ -27,7 +28,7 @@ Drive::~Drive(){
    delete directory_;
 }
 
-bool Drive::load(QString file) {
+bool Drive::load() {
     // This function looks for the HDDOrganizer index file
     // in the root of the directory "Drive"
     //
@@ -35,10 +36,20 @@ bool Drive::load(QString file) {
     // is not the correct format, etc...
     //
     // This is where the XML parsing code will go
-    return false;
+
+    QString file(this->directory_->absolutePath() + QString("/HDDO.xml"));
+    QFile loadFile(file);
+
+    bool result = false;
+    if (loadFile.exists())
+        result = this->tagTree_->setContent(&loadFile);
+
+    return result;
 }
 
-bool Drive::save(QString file) {
+bool Drive::save() {
+
+    QString file(this->directory_->absolutePath() + QString("/HDDO.xml"));
     // This function writes the HDDOrganizer index file to disk
     //
     // It returns false if there are not the right permissions,

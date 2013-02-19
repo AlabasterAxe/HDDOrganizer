@@ -6,6 +6,7 @@
 
 class Tag;
 class QDomDocument;
+class QDomElement;
 
 class TagTreeModel : public QAbstractItemModel
 {
@@ -27,10 +28,13 @@ public:
     bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent);
     QFileInfoList computeResult(QModelIndexList tags) const;
     QString stringify() const;
+    bool setContent(QIODevice * dev);
 
+    void translate(QDomElement *domNode, Tag *tagNode);
 private:
     Tag* root_;
     QDomDocument* domTree_;
+    QDomElement* domTreeRoot_;
 
 signals:
     

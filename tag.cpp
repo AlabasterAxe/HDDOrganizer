@@ -2,17 +2,17 @@
 #include <iostream>
 
 #include <QVariant>
-#include <QDomNamedNodeMap>
+#include <QDomElement>
 
-bool Tag::addChild(const QString tagName, QDomElement* tagDomNode) {
+Tag* Tag::addChild(const QString tagName, QDomElement* tagDomNode) {
     if (tagName.length() == 0)
-        return false;
+        return 0;
 
     QList<QVariant> data;
     data << tagName << 0;
     Tag* tag = new Tag(data, tagDomNode, this);
     this->children_.append(tag);
-    return true;
+    return tag;
 }
 
 Tag::Tag(const QList<QVariant> &data, QDomElement* domNode, Tag *parent)
@@ -40,7 +40,13 @@ QVariant Tag::data(int column) const {
 
 bool Tag::addFiles(const QList<QUrl> files) {
     int urlQuantity = files.size();
-    QString fileAttribute = domNode_->attribute(QString("files"));
+    QString attrName("files");
+    QString fileString;
+
+    if(domNode_)
+        fileString = domNode_->attribute(attrName);
+    else
+        return false;
 
     for (int i = 0; i < urlQuantity; ++i) {
         if (files[i].isLocalFile()) {
@@ -48,13 +54,27 @@ bool Tag::addFiles(const QList<QUrl> files) {
             if (!files_.contains(fileName)) {
                 this->files_.insert(fileName);
                 this->setData(1,this->data(1).toInt()+1);
-                fileAttribute.append(fileName);
-                fileAttribute.append(QString("|"));
+                fileString.append(fileName);
+                fileString.append(QString("|"));
             }
         }
     }
 
-    domNode_->setAttribute(QString("files"), fileAttribute);
+    this->domNode_->setAttribute(attrName,fileString);
+    return true;
+}
+
+bool Tag::setFiles(const QList<QString> files) {
+    int fileQuantity = files.size();
+    QString attrName("files");
+    QString fileString;
+
+    for (int i = 0; i < fileQuantity; ++i) {
+        QString fileName = files[i];
+        this->files_.insert(fileName);
+        this->setData(1,this->data(1).toInt()+1);
+    }
+
     return true;
 }
 

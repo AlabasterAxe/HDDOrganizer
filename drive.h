@@ -15,8 +15,6 @@ class Drive : public QAbstractTableModel
 public:
     Drive(QString dir);
     ~Drive();
-    bool load(QString file);
-    bool save(QString file);
     bool overwrite(QString file);
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -28,6 +26,8 @@ public:
 
 public slots:
     bool index();
+    bool save();
+    bool load();
 
 private:
     QDir *directory_;
