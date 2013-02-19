@@ -32,11 +32,10 @@ void TagTreeModel::translate(QDomElement * domNode, Tag * tagNode) {
     QDomNodeList domChildren = domNode->childNodes();
 
     int numChildren = domChildren.size();
-    qDebug() << numChildren;
     for (int i = 0; i < numChildren; ++i) {
-        QDomElement child = domChildren.item(i).toElement();
-        Tag* childTag = tagNode->addChild(child.nodeName(), &child);
-        this->translate(&child, childTag);
+        QDomElement* child = new QDomElement(domChildren.item(i).toElement());
+        Tag* childTag = tagNode->addChild(child->nodeName(), child);
+        this->translate(child, childTag);
     }
 
     QString fileString = domNode->attribute(QString("files"));
@@ -217,8 +216,8 @@ bool TagTreeModel::setContent(QIODevice *dev)
 {
     QString error;
     bool result = this->domTree_->setContent(dev, &error);
-    QDomElement domRootElement = this->domTree_->firstChild().toElement();
-    this->domTreeRoot_ = &domRootElement;
+    QDomElement* domRootElement = new QDomElement(this->domTree_->firstChild().toElement());
+    this->domTreeRoot_ = domRootElement;
 
     this->translate(this->domTreeRoot_, this->root_);
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>557</width>
-    <height>326</height>
+    <width>998</width>
+    <height>516</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -130,25 +130,6 @@
         </attribute>
        </widget>
       </item>
-      <item>
-       <widget class="QListWidget" name="listWidget">
-        <property name="acceptDrops">
-         <bool>true</bool>
-        </property>
-        <property name="dragEnabled">
-         <bool>true</bool>
-        </property>
-        <property name="dragDropOverwriteMode">
-         <bool>true</bool>
-        </property>
-        <property name="dragDropMode">
-         <enum>QAbstractItemView::DragDrop</enum>
-        </property>
-        <property name="defaultDropAction">
-         <enum>Qt::CopyAction</enum>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
    </layout>
@@ -158,7 +139,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>557</width>
+     <width>998</width>
      <height>18</height>
     </rect>
    </property>

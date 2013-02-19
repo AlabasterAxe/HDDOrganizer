@@ -1,3 +1,6 @@
+// Matthew Keller
+// This is the main storage item for the tag tree model
+
 #include "tag.h"
 #include <iostream>
 
@@ -21,6 +24,13 @@ Tag::Tag(const QList<QVariant> &data, QDomElement* domNode, Tag *parent)
     this->data_ = data;
     this->domNode_ = domNode;
 }
+
+Tag::~Tag()
+{
+    delete domNode_;
+    // TODO Recursively delete children nodes.
+}
+
 
 Tag* Tag::child(int row) {
     return this->children_.value(row);
@@ -68,6 +78,8 @@ bool Tag::setFiles(const QList<QString> files) {
     int fileQuantity = files.size();
     QString attrName("files");
     QString fileString;
+
+    this->files_.clear();
 
     for (int i = 0; i < fileQuantity; ++i) {
         QString fileName = files[i];
