@@ -1,3 +1,9 @@
+// Matthew Keller
+//
+// Defines the main UI.
+// Connects the various elements of the UI using QT's signals and slots
+// system.
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -23,7 +29,6 @@ public:
     
 private:
     Ui::MainWindow *ui;
-    //QDir drive;
     QFileSystemModel* fileSys_;
     Drive* drive_;
     NotificationDialog* notificationDialog_;
@@ -33,6 +38,7 @@ private slots:
     void selectDirectory();
     void addTag();
     void recalculate();
+    void sortTableByColumn(int column, Qt::SortOrder order);
 };
 
 #endif // MAINWINDOW_H

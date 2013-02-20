@@ -190,9 +190,9 @@ bool TagTreeModel::dropMimeData(const QMimeData* data, Qt::DropAction action, in
     return true;
 }
 
-QFileInfoList TagTreeModel::computeResult(QModelIndexList tags) const {
+QList<QFileInfo> TagTreeModel::computeResult(QModelIndexList tags) const {
     if (tags.size() < 1)
-        return QFileInfoList();
+        return QList<QFileInfo>();
 
     QSet<QString> first = getIndexTag(tags[0])->allFiles();
 
@@ -200,7 +200,7 @@ QFileInfoList TagTreeModel::computeResult(QModelIndexList tags) const {
     for (int i = 1; i < tagQuantity; ++i)
         first = first.intersect(getIndexTag(tags[i])->allFiles());
 
-    QFileInfoList files;
+    QList<QFileInfo> files;
 
     for (auto i = first.begin(); i != first.end(); ++i)
         files.append(QFileInfo(*i));

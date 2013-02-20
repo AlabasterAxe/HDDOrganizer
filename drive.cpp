@@ -5,6 +5,7 @@
 #include <QImage>
 #include <QDateTime>
 #include <QTextStream>
+#include <QDebug>
 #include <QDomNode>
 
 Drive::Drive(QString dir): columns_(4)
@@ -179,4 +180,74 @@ bool Drive::recalculate(QModelIndexList tags) {
     emit(doneCalculating());
     return true;
 }
+
+bool filenameLessthan(const QFileInfo& file1, const QFileInfo& file2){
+    qDebug() << "hobo juice";
+    return file1.fileName() < file2.fileName();
+}
+
+bool sizeLessthan(const QFileInfo& file1, const QFileInfo& file2){
+    return file1.size() < file2.size();
+}
+
+bool typeLessthan(const QFileInfo& file1, const QFileInfo& file2){
+    return file1.completeSuffix() < file2.completeSuffix();
+}
+
+bool dateLessthan(const QFileInfo& file1, const QFileInfo& file2){
+    return file1.lastModified() < file2.lastModified();
+}
+
+bool filenameGreaterthan(const QFileInfo& file1, const QFileInfo& file2){
+    qDebug() << "hobo juice";
+    return file1.fileName() > file2.fileName();
+}
+
+bool sizeGreaterthan(const QFileInfo& file1, const QFileInfo& file2){
+    return file1.size() > file2.size();
+}
+
+bool typeGreaterthan(const QFileInfo& file1, const QFileInfo& file2){
+    return file1.completeSuffix() > file2.completeSuffix();
+}
+
+bool dateGreaterthan(const QFileInfo& file1, const QFileInfo& file2){
+    return file1.lastModified() > file2.lastModified();
+}
+
+void Drive::sort(int column, Qt::SortOrder order)
+{
+    if (order == Qt::AscendingOrder) {
+        switch (column) {
+        case 0:
+            qSort(results_.begin(), results_.end(), filenameLessthan);
+            return;
+        case 1:
+            qSort(results_.begin(), results_.end(), sizeLessthan);
+            return;
+        case 2:
+            qSort(results_.begin(), results_.end(), typeLessthan);
+            return;
+        case 3:
+            qSort(results_.begin(), results_.end(), dateLessthan);
+            return;
+        }
+    } else {
+        switch (column) {
+        case 0:
+            qSort(results_.begin(), results_.end(), filenameGreaterthan);
+            return;
+        case 1:
+            qSort(results_.begin(), results_.end(), sizeGreaterthan);
+            return;
+        case 2:
+            qSort(results_.begin(), results_.end(), typeGreaterthan);
+            return;
+        case 3:
+            qSort(results_.begin(), results_.end(), dateGreaterthan);
+            return;
+        }
+    }
+}
+
 //bool compute()

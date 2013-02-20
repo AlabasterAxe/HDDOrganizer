@@ -70,6 +70,9 @@
       </item>
       <item>
        <widget class="QTableView" name="tableView">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="acceptDrops">
          <bool>true</bool>
         </property>

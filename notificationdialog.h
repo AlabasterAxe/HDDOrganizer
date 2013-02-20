@@ -1,3 +1,7 @@
+// Matthew Keller
+//
+// Generic Notification Dialog Box.
+
 #ifndef INDEXDIALOG_H
 #define INDEXDIALOG_H
 
@@ -14,6 +18,9 @@ class NotificationDialog : public QDialog
 public:
     explicit NotificationDialog(QWidget *parent = 0);
     ~NotificationDialog();
+
+    // Accepts the message and the window title and returns the
+    // user's selection.
     bool notify(QString message, QString windowName);
     
 private:

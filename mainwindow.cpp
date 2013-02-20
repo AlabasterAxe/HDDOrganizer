@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(this->ui->pushButton,SIGNAL(pressed()),this,SLOT(addTag()));
     QObject::connect(this->ui->treeView,SIGNAL(clicked(const QModelIndex&)),this,SLOT(recalculate()));
     QObject::connect(this->drive_,SIGNAL(doneCalculating()),this->ui->tableView_2,SLOT(reset()));
+    QObject::connect(this->ui->tableView_2->horizontalHeader(),SIGNAL(sortIndicatorChanged(int, Qt::SortOrder)),this,SLOT(sortTableByColumn(int, Qt::SortOrder)));
 }
 
 MainWindow::~MainWindow()
@@ -108,4 +109,10 @@ void MainWindow::addTag() {
 void MainWindow::recalculate() {
     QModelIndexList selection = this->ui->treeView->selectionModel()->selectedIndexes();
     this->drive_->recalculate(selection);
+}
+
+void MainWindow::sortTableByColumn(int column, Qt::SortOrder order)
+{
+    this->ui->tableView_2->sortByColumn(column, order);
+    this->ui->tableView_2->reset();
 }

@@ -1,3 +1,7 @@
+// Matthew Keller
+//
+// Asks the user for a tag name.
+
 #ifndef TAGNAMEDIALOG_H
 #define TAGNAMEDIALOG_H
 
@@ -14,6 +18,8 @@ class TagNameDialog : public QDialog
 public:
     explicit TagNameDialog(QWidget *parent = 0);
     ~TagNameDialog();
+
+    // Returns the value of the line edit.
     QString tagName();
     
 private:

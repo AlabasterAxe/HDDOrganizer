@@ -1,4 +1,5 @@
 // Matthew Keller
+//
 // The tag class represents a single node in the tag tree.
 // This corresponds with the ui notion of a "Tag" which can be added
 // and removed and nested under one another.
