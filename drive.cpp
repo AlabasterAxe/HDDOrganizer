@@ -182,7 +182,6 @@ bool Drive::recalculate(QModelIndexList tags) {
 }
 
 bool filenameLessthan(const QFileInfo& file1, const QFileInfo& file2){
-    qDebug() << "hobo juice";
     return file1.fileName() < file2.fileName();
 }
 
