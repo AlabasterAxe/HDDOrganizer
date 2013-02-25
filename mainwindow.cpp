@@ -47,7 +47,7 @@ void MainWindow::selectDirectory() {
     // Prompt the user for which drive they would like to work with.
     QString driveName = QFileDialog::getExistingDirectory(this,
                                                           tr("Select Directory"));
-    if (driveName.isEmpty()) {
+    if (driveName.isEmpty() && !this->drive_) {
         QString dialogMessage("Please select a valid directory. Select \"Ok\" to select a new directory or \"Cancel\" to exit the program. ");
         QString dialogTitle("Select a directory");
         if (this->notificationDialog_->notify(dialogMessage,dialogTitle)) {
