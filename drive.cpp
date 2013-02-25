@@ -2,13 +2,23 @@
 #include "tagtreemodel.h"
 #include <iostream>
 #include <QDir>
+#include <QUrl>
+#include <QMimeData>
 #include <QImage>
 #include <QDateTime>
 #include <QTextStream>
 #include <QDebug>
 #include <QDomNode>
+#include <QPicture>
+#include <QDesktopServices>
+#include <QProcess>
+#include "MainWindow.h"
+#include "ui_mainwindow.h"
 
-Drive::Drive(QString dir): columns_(4)
+Drive::Drive(QString dir, MainWindow *parent): columns_(4),
+                                            sortColumn_(0),
+                                            sortOrder_(Qt::AscendingOrder),
+                                            parent_(parent)
 {
     // Initializes the drive object's private member,
     // the directory name
@@ -35,8 +45,6 @@ bool Drive::load() {
     //
     // It returns false if the file doesn't exist, is corrupt,
     // is not the correct format, etc...
-    //
-    // This is where the XML parsing code will go
 
     QString file(this->directory_->absolutePath() + QString("/HDDO.xml"));
     QFile loadFile(file);
@@ -46,6 +54,39 @@ bool Drive::load() {
         result = this->tagTree_->setContent(&loadFile);
 
     return result;
+}
+
+void Drive::reset()
+{
+    this->results_ = this->directory_->entryInfoList(QDir::Files);
+    this->sort(sortColumn_,sortOrder_);
+}
+
+void Drive::preview(const QModelIndex & index)
+{
+    QFileInfo file = results_[index.row()];
+    QString filetype = file.suffix().toLower();
+    QLabel* label = this->parent_->ui->label;
+
+    if (filetype == "jpg") {
+        QPixmap pic(file.absoluteFilePath());
+        if (pic.width() > pic.height())
+            label->setPixmap(pic.scaledToWidth(label->width()));
+        else
+            label->setPixmap(pic.scaledToHeight(label->height()));
+        //this->parent_->ui->label->setPixmap(*pic);
+    }
+}
+
+void Drive::open(const QModelIndex &index, const QString &program)
+{
+    QString fileName = this->results_[index.row()].absoluteFilePath();
+    if (program.isEmpty()) {
+        QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+    } else {
+        QStringList args(fileName);
+        QProcess::startDetached(program, args);
+    }
 }
 
 bool Drive::save() {
@@ -116,7 +157,7 @@ int Drive::rowCount(const QModelIndex &parent) const {
     // number of results for a given expression
 
     // this number could be as many as 1000 or even higher
-
+    //qDebug() << results_.size();
     return results_.size();
 }
 
@@ -176,7 +217,22 @@ QVariant Drive::headerData ( int section,
 }
 
 bool Drive::recalculate(QModelIndexList tags) {
-    this->results_ = this->tagTree_->computeResult(tags);
+    beginRemoveRows(QModelIndex(), 0, this->results_.size()-1);
+    this->results_ = QFileInfoList();
+    endRemoveRows();
+
+    QFileInfoList newResults;
+    if(tags.size() == 0) {
+        newResults = this->directory_->entryInfoList(QDir::Files);
+    } else {
+        newResults = this->tagTree_->computeResult(tags);
+    }
+
+    beginInsertRows(QModelIndex(), 0, newResults.size()-1);
+    this->results_ = newResults;
+    endInsertRows();
+
+    this->sort(this->sortColumn_,this->sortOrder_);
     emit(doneCalculating());
     return true;
 }
@@ -198,7 +254,6 @@ bool dateLessthan(const QFileInfo& file1, const QFileInfo& file2){
 }
 
 bool filenameGreaterthan(const QFileInfo& file1, const QFileInfo& file2){
-    qDebug() << "hobo juice";
     return file1.fileName() > file2.fileName();
 }
 
@@ -216,6 +271,8 @@ bool dateGreaterthan(const QFileInfo& file1, const QFileInfo& file2){
 
 void Drive::sort(int column, Qt::SortOrder order)
 {
+    this->sortColumn_ = column;
+    this->sortOrder_ = order;
     if (order == Qt::AscendingOrder) {
         switch (column) {
         case 0:
@@ -249,4 +306,23 @@ void Drive::sort(int column, Qt::SortOrder order)
     }
 }
 
+Qt::ItemFlags Drive::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return 0;
+
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled;
+}
+
+QMimeData* Drive::mimeData(const QModelIndexList &indexes) const
+{
+    QList<QUrl> urls;
+    QList<QModelIndex>::const_iterator it = indexes.begin();
+    for (; it != indexes.end(); ++it)
+        if ((*it).column() == 0)
+            urls << QUrl::fromLocalFile(this->results_[it->row()].absoluteFilePath());
+    QMimeData *data = new QMimeData();
+    data->setUrls(urls);
+    return data;
+}
 //bool compute()

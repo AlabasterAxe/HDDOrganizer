@@ -20,8 +20,15 @@ public:
     // Same as above.
     void dragEnterEvent(QDragEnterEvent* event);
 
+    void mousePressEvent(QMouseEvent* event);
+
+    void mouseReleaseEvent(QMouseEvent* event);
+
 signals:
-    
+
+    void viewClicked();
+    void viewReleased();
+
 public slots:
     
 };

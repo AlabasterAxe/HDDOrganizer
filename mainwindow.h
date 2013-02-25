@@ -25,11 +25,10 @@ class MainWindow : public QMainWindow
     
 public:
     explicit MainWindow(QWidget *parent = 0);
+    Ui::MainWindow *ui;
     ~MainWindow();
     
 private:
-    Ui::MainWindow *ui;
-    QFileSystemModel* fileSys_;
     Drive* drive_;
     NotificationDialog* notificationDialog_;
     TagNameDialog* tagNameDialog_;

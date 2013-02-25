@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     tagtreemodel.cpp \
     tagnamedialog.cpp \
     tagtreeview.cpp \
-    notificationdialog.cpp
+    notificationdialog.cpp \
+    filetableview.cpp
 
 HEADERS  += mainwindow.h \
     tag.h \
@@ -28,7 +29,8 @@ HEADERS  += mainwindow.h \
     tagtreemodel.h \
     tagnamedialog.h \
     tagtreeview.h \
-    notificationdialog.h
+    notificationdialog.h \
+    filetableview.h
 
 FORMS    += mainwindow.ui \
     tagnamedialog.ui \

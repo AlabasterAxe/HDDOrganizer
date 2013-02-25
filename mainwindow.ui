@@ -28,6 +28,12 @@
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="TagTreeView" name="treeView">
+          <property name="maximumSize">
+           <size>
+            <width>250</width>
+            <height>16777215</height>
+           </size>
+          </property>
           <property name="acceptDrops">
            <bool>true</bool>
           </property>
@@ -69,38 +75,13 @@
        </layout>
       </item>
       <item>
-       <widget class="QTableView" name="tableView">
-        <property name="enabled">
-         <bool>true</bool>
+       <widget class="FileTableView" name="tableView">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
         </property>
-        <property name="acceptDrops">
-         <bool>true</bool>
-        </property>
-        <property name="dragEnabled">
-         <bool>true</bool>
-        </property>
-        <property name="dragDropOverwriteMode">
-         <bool>false</bool>
-        </property>
-        <property name="dragDropMode">
-         <enum>QAbstractItemView::DragDrop</enum>
-        </property>
-        <property name="defaultDropAction">
-         <enum>Qt::CopyAction</enum>
-        </property>
-        <property name="alternatingRowColors">
-         <bool>true</bool>
-        </property>
-        <property name="selectionBehavior">
-         <enum>QAbstractItemView::SelectRows</enum>
-        </property>
-        <property name="sortingEnabled">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTableView" name="tableView_2">
         <property name="acceptDrops">
          <bool>true</bool>
         </property>
@@ -131,6 +112,22 @@
         <attribute name="verticalHeaderVisible">
          <bool>false</bool>
         </attribute>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Image Preview</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
        </widget>
       </item>
      </layout>
@@ -173,6 +170,11 @@
    <class>TagTreeView</class>
    <extends>QTreeView</extends>
    <header>tagtreeview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>FileTableView</class>
+   <extends>QTableView</extends>
+   <header>filetableview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -18,7 +18,7 @@ TagTreeModel::TagTreeModel(QString name, QObject *parent) :
     // initialize the root node with the titles of the columns for the tree view
     QList<QVariant> data;
     data << "Tag" << "# of Files";
-    this->root_ = new Tag(data);
+    this->root_ = new Tag(data, this->domTreeRoot_);
 
 }
 
@@ -155,6 +155,7 @@ bool TagTreeModel::insertTag(const QString tagName, const QModelIndex& parent) {
     bool result;
 
     QDomElement tagDomNode = this->domTree_->createElement(tagName);
+    qDebug() << parentDomNode->nodeName();
     QDomElement* tagDomNodePointer = new QDomElement(tagDomNode);
 
     beginInsertRows(parent, position, position);

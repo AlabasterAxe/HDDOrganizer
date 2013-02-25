@@ -21,7 +21,9 @@
 #include "QFileInfo.h"
 
 class QDir;
+class QAction;
 class TagTreeModel;
+class MainWindow;
 
 class Drive : public QAbstractTableModel
 {
@@ -30,7 +32,7 @@ class Drive : public QAbstractTableModel
 public:
 
     // constructs a Drive with the specified directory.
-    Drive(QString dir);
+    Drive(QString dir, MainWindow* parent);
     ~Drive();
 
     // not sure if this is necessary
@@ -57,20 +59,32 @@ public:
     // Redefine Q
     void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
+    // Defines the interaction for the particular QModelIndex.
+    Qt::ItemFlags flags(const QModelIndex &index) const;
+
     TagTreeModel* tagTree_;
+
+    QMimeData *mimeData(const QModelIndexList &indexes) const;
 
 public slots:
     bool index();
     bool save();
     bool load();
+    void reset();
+    void preview(const QModelIndex &index);
+    void open(const QModelIndex &index, const QString & program = 0);
 
 private:
     QDir *directory_;
     QList<QFileInfo> results_;
     int columns_;
+    int sortColumn_;
+    MainWindow* parent_;
+    Qt::SortOrder sortOrder_;
 
 signals:
     void doneCalculating();
+    void rowsAboutToBeRemoved(int start, int end);
 };
 
 #endif // DRIVE_H

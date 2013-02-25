@@ -7,7 +7,6 @@
 #include "tagnamedialog.h"
 
 #include <QFileDialog>
-#include <iostream>
 #include <QFileSystemModel>
 
 #define TAG_TREE_COLUMNS 2
@@ -18,24 +17,28 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    this->fileSys_ = 0;
     this->drive_ = 0;
     this->notificationDialog_ = new NotificationDialog;
     this->tagNameDialog_ = new TagNameDialog;
     this->selectDirectory();
 
-    QObject::connect(this->ui->actionSelectDirectory,SIGNAL(triggered()),this,SLOT(selectDirectory()));
-    QObject::connect(this->ui->actionSave,SIGNAL(triggered()),this->drive_,SLOT(save()));
-    QObject::connect(this->ui->pushButton,SIGNAL(pressed()),this,SLOT(addTag()));
-    QObject::connect(this->ui->treeView,SIGNAL(clicked(const QModelIndex&)),this,SLOT(recalculate()));
-    QObject::connect(this->drive_,SIGNAL(doneCalculating()),this->ui->tableView_2,SLOT(reset()));
-    QObject::connect(this->ui->tableView_2->horizontalHeader(),SIGNAL(sortIndicatorChanged(int, Qt::SortOrder)),this,SLOT(sortTableByColumn(int, Qt::SortOrder)));
+    QObject::connect(this->ui->actionSelectDirectory,SIGNAL(triggered()),
+                     this,SLOT(selectDirectory()));
+    QObject::connect(this->ui->pushButton,SIGNAL(pressed()),
+                     this,SLOT(addTag()));
+    QObject::connect(this->ui->treeView,SIGNAL(viewClicked()),
+                     this,SLOT(recalculate()));
+    QObject::connect(this->ui->tableView->horizontalHeader(),
+                     SIGNAL(sortIndicatorChanged(int, Qt::SortOrder)),
+                     this,
+                     SLOT(sortTableByColumn(int, Qt::SortOrder)));
+    QObject::connect(this->ui->treeView,SIGNAL(viewReleased()),
+                     this->ui->tableView,SLOT(reset()));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete fileSys_;
     delete drive_;
     delete notificationDialog_;
 }
@@ -55,29 +58,21 @@ void MainWindow::selectDirectory() {
         }
     }
 
-    // The filesystem model would accumulate strangeness after several
-    // operations so a new one is created each time the user selects a new
-    // directory to work with.
-    if (this->fileSys_)
-        delete this->fileSys_;
-    this->fileSys_ = new QFileSystemModel(this);
-    this->fileSys_->setFilter(QDir::NoDotAndDotDot|QDir::Files);
-    this->fileSys_->setRootPath(driveName);
-
-    // This line applies the previously initialized file system model
-    // to the tree view.
-    ui->tableView->setModel(this->fileSys_);
-
-    // Set the view of the tree view ui element to be the selected directory
-    this->ui->tableView->setRootIndex(this->fileSys_->index(driveName));
-
     if (this->drive_)
         delete this->drive_;
-    this->drive_ = new Drive(driveName);
-    this->ui->tableView_2->setModel(this->drive_);
+    this->drive_ = new Drive(driveName, this);
+    this->ui->tableView->setModel(this->drive_);
     this->ui->treeView->setModel(this->drive_->tagTree_);
 
-    QString filename = "CHANGE";
+    QObject::connect(this->drive_,SIGNAL(doneCalculating()),this->ui->tableView,SLOT(reset()));
+    QObject::connect(this->ui->actionSave,SIGNAL(triggered()),this->drive_,SLOT(save()));
+    QObject::connect(this->ui->tableView,SIGNAL(clicked(const QModelIndex)),
+                     this->drive_,SLOT(preview(QModelIndex)));
+    QObject::connect(this->ui->tableView,SIGNAL(doubleClicked(const QModelIndex)),
+                     this->drive_,SLOT(open(QModelIndex)));
+    QObject::connect(this->ui->tableView,SIGNAL(activated(const QModelIndex)),
+                     this->drive_,SLOT(preview(QModelIndex)));
+
     if(!this->drive_->load()) {
         QString dialogMessage("No index file was found for this \"Drive\". Would you like to index it now?");
         QString dialogTitle("Index Drive?");
@@ -111,8 +106,9 @@ void MainWindow::recalculate() {
     this->drive_->recalculate(selection);
 }
 
+
 void MainWindow::sortTableByColumn(int column, Qt::SortOrder order)
 {
-    this->ui->tableView_2->sortByColumn(column, order);
-    this->ui->tableView_2->reset();
+    this->ui->tableView->sortByColumn(column, order);
+    this->ui->tableView->reset();
 }
