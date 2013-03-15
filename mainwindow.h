@@ -27,7 +27,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     Ui::MainWindow *ui;
     ~MainWindow();
-    
+    void setExpressionLabel(QString expression);
+
 private:
     Drive* drive_;
     NotificationDialog* notificationDialog_;
@@ -36,6 +37,7 @@ private:
 private slots:
     void selectDirectory();
     void addTag();
+    void removeTag();
     void recalculate();
     void sortTableByColumn(int column, Qt::SortOrder order);
 };

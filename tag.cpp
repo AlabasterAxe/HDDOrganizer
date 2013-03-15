@@ -18,6 +18,12 @@ Tag* Tag::addChild(const QString tagName, QDomElement* tagDomNode) {
     return tag;
 }
 
+bool Tag::removeChild(Tag *child)
+{
+    this->domNode_->removeChild(*child->domNodePointer());
+    return this->children_.removeOne(child);
+}
+
 Tag::Tag(const QList<QVariant> &data, QDomElement* domNode, Tag *parent)
 {
     this->parent_ = parent;
@@ -28,6 +34,11 @@ Tag::Tag(const QList<QVariant> &data, QDomElement* domNode, Tag *parent)
 Tag::~Tag()
 {
     delete domNode_;
+    for(int i = 0; i < this->children_.size();++i) {
+        delete children_[i];
+    }
+
+    children_.clear();
     // TODO Recursively delete children nodes.
 }
 

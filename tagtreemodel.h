@@ -52,6 +52,10 @@ public:
     // If no parent is specified, it is added to the root.
     bool insertTag(const QString tagName, const QModelIndex& parent = QModelIndex());
 
+    // Adds a tag of the given name to the specified parent.
+    // If no parent is specified, it is added to the root.
+    bool deleteTag(const QModelIndex& tag);
+
     // Returns a tag pointer given its QModelIndex.
     Tag* getIndexTag(const QModelIndex& index) const;
 

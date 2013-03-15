@@ -1,5 +1,6 @@
 #include "drive.h"
 #include "tagtreemodel.h"
+#include "tag.h"
 #include <iostream>
 #include <QDir>
 #include <QUrl>
@@ -217,20 +218,34 @@ QVariant Drive::headerData ( int section,
 }
 
 bool Drive::recalculate(QModelIndexList tags) {
-    beginRemoveRows(QModelIndex(), 0, this->results_.size()-1);
-    this->results_ = QFileInfoList();
-    endRemoveRows();
+    if(this->results_.size() > 0) {
+        beginRemoveRows(QModelIndex(), 0, this->results_.size()-1);
+        this->results_ = QFileInfoList();
+        endRemoveRows();
+    }
 
     QFileInfoList newResults;
     if(tags.size() == 0) {
+        this->parent_->setExpressionLabel(tr("All Files"));
         newResults = this->directory_->entryInfoList(QDir::Files);
     } else {
+        QString expressionLabel = "";
+        for (int i = 0; i < tags.size(); i += TAG_TREE_COLUMNS) {
+             Tag* tag = tagTree_->getIndexTag(tags[i]);
+             expressionLabel.append(tag->data(0).toString());
+
+             if  (i < tags.size() - TAG_TREE_COLUMNS)
+                 expressionLabel.append(tr(" &#x2229; "));
+        }
+        this->parent_->setExpressionLabel(expressionLabel);
         newResults = this->tagTree_->computeResult(tags);
     }
 
-    beginInsertRows(QModelIndex(), 0, newResults.size()-1);
-    this->results_ = newResults;
-    endInsertRows();
+    if(newResults.size() > 0) {
+        beginInsertRows(QModelIndex(), 0, newResults.size()-1);
+        this->results_ = newResults;
+        endInsertRows();
+    }
 
     this->sort(this->sortColumn_,this->sortOrder_);
     emit(doneCalculating());

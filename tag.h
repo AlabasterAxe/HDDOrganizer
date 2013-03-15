@@ -49,6 +49,8 @@ public:
     // tag on success and 0 on failure.
     Tag* addChild(QString tagName, QDomElement* tagDomNode);
 
+    bool removeChild(Tag* child);
+
     // Appends files to the internal list of files as well as the
     // matching DOM node. This function is used for drag and drop
     // additions of files to a tag.

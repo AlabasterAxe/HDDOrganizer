@@ -9,8 +9,6 @@
 #include <QFileDialog>
 #include <QFileSystemModel>
 
-#define TAG_TREE_COLUMNS 2
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -26,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
                      this,SLOT(selectDirectory()));
     QObject::connect(this->ui->pushButton,SIGNAL(pressed()),
                      this,SLOT(addTag()));
+    QObject::connect(this->ui->pushButton_2,SIGNAL(pressed()),
+                     this,SLOT(removeTag()));
     QObject::connect(this->ui->treeView,SIGNAL(viewClicked()),
                      this,SLOT(recalculate()));
     QObject::connect(this->ui->tableView->horizontalHeader(),
@@ -41,6 +41,11 @@ MainWindow::~MainWindow()
     delete ui;
     delete drive_;
     delete notificationDialog_;
+}
+
+void MainWindow::setExpressionLabel(QString expression)
+{
+    this->ui->tagExpressionLabel->setText(expression);
 }
 
 void MainWindow::selectDirectory() {
@@ -99,6 +104,17 @@ void MainWindow::addTag() {
             this->drive_->tagTree_->insertTag(tagName,selection[0]);
         }
     }
+}
+
+void MainWindow::removeTag() {
+    QModelIndexList selection = this->ui->treeView->selectionModel()->selectedIndexes();
+    if (selection.count() != 1*TAG_TREE_COLUMNS) {
+        QString message = "Please select a single tag to delete.";
+        this->ui->statusBar->showMessage(message, 1000);
+        return;
+    }
+
+    this->drive_->tagTree_->deleteTag(selection[0]);
 }
 
 void MainWindow::recalculate() {

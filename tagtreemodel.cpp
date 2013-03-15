@@ -169,6 +169,21 @@ bool TagTreeModel::insertTag(const QString tagName, const QModelIndex& parent) {
     return result;
 }
 
+bool TagTreeModel::deleteTag(const QModelIndex &tag)
+{
+    if (tag.isValid()) {
+        Tag* tagPointer = this->getIndexTag(tag);
+        Tag* tagParent = tagPointer->parent();
+        beginRemoveRows(tag.parent(),tag.row(),tag.row());
+        tagParent->removeChild(tagPointer);
+        endRemoveRows();
+        delete tagPointer;
+        return true;
+    }
+
+    return false;
+}
+
 
 Tag* TagTreeModel::getIndexTag(const QModelIndex& index) const {
     if (index.isValid()) {

@@ -15,6 +15,8 @@
 #ifndef DRIVE_H
 #define DRIVE_H
 
+#define TAG_TREE_COLUMNS 2
+
 #include <QStringList>
 #include <QAbstractTableModel>
 #include <QFileInfoList>
