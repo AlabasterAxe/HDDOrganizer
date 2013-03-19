@@ -96,6 +96,7 @@ public:
     // Return the internal DOM pointer.
     QDomElement* domNodePointer() const;
 
+    void setDomNodePointer(QDomElement *domNode);
 private:
     QList<Tag*> children_;
     Tag* parent_;

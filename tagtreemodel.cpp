@@ -128,7 +128,7 @@ Qt::ItemFlags TagTreeModel::flags(const QModelIndex &index) const {
     if (!index.isValid())
         return 0;
 
-    return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDropEnabled;
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDropEnabled | Qt::ItemIsDragEnabled;
 }
 
 QModelIndex TagTreeModel::parent(const QModelIndex & child) const {
@@ -142,6 +142,7 @@ QModelIndex TagTreeModel::parent(const QModelIndex & child) const {
        return QModelIndex();
     }
 
+    //qDebug() << childTag->data(0);
     return createIndex(parentTag->row(), 0, parentTag);
 }
 
@@ -192,6 +193,8 @@ bool TagTreeModel::deleteTag(const QModelIndex &tag)
     if (tag.isValid()) {
         Tag* tagPointer = this->getIndexTag(tag);
         Tag* tagParent = tagPointer->parent();
+        if (tagParent == this->root_)
+            qDebug() << "Yay";
         beginRemoveRows(tag.parent(),tag.row(),tag.row());
         tagParent->removeChild(tagPointer);
         endRemoveRows();
@@ -253,6 +256,14 @@ bool TagTreeModel::setContent(QIODevice *dev)
     QDomElement* domRootElement = new QDomElement(this->domTree_->firstChild().toElement());
     this->domTreeRoot_ = domRootElement;
 
+    if (this->domTreeRoot_->hasChildNodes()) {
+        QDomNodeList children = this->domTreeRoot_->childNodes();
+        qDebug() << "There are " << children.size() << " children for Node: " << this->domTreeRoot_->nodeName();
+    } else {
+        qDebug() << "There are no children for Node: " << this->domTreeRoot_->nodeName();
+    }
+
+    this->root_->setDomNodePointer(this->domTreeRoot_);
     this->translate(this->domTreeRoot_, this->root_);
 
     return result;

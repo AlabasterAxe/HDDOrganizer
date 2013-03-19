@@ -40,9 +40,13 @@ public:
 
     void mouseReleaseEvent(QMouseEvent* event);
 
+    void mouseDoubleClickEvent(QMouseEvent *event);
+    void keyPressEvent(QKeyEvent *event);
 signals:
 
     void viewClicked();
+    void enterPressed();
+    void viewDoubleClicked();
     void viewReleased();
 
 public slots:

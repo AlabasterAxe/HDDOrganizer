@@ -46,8 +46,22 @@ void TagTreeView::mousePressEvent(QMouseEvent *event)
     emit(viewClicked());
 }
 
+void TagTreeView::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    QTreeView::mouseDoubleClickEvent(event);
+    emit(viewDoubleClicked());
+}
+
 void TagTreeView::mouseReleaseEvent(QMouseEvent *event)
 {
     QTreeView::mouseReleaseEvent(event);
     emit(viewReleased());
+}
+
+void TagTreeView::keyPressEvent(QKeyEvent *event)
+{
+    QTreeView::keyPressEvent(event);
+
+    if (event->key() == Qt::Key_Enter)
+        emit(enterPressed());
 }

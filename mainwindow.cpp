@@ -44,7 +44,9 @@ MainWindow::MainWindow(QWidget *parent) :
                      this,SLOT(addTag()));
     QObject::connect(this->ui->pushButton_2,SIGNAL(pressed()),
                      this,SLOT(removeTag()));
-    QObject::connect(this->ui->treeView,SIGNAL(viewClicked()),
+    QObject::connect(this->ui->treeView,SIGNAL(viewDoubleClicked()),
+                     this,SLOT(recalculate()));
+    QObject::connect(this->ui->treeView,SIGNAL(activated(const QModelIndex)),
                      this,SLOT(recalculate()));
     QObject::connect(this->ui->tableView->horizontalHeader(),
                      SIGNAL(sortIndicatorChanged(int, Qt::SortOrder)),

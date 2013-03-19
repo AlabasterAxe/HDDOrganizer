@@ -22,6 +22,7 @@
 #include <iostream>
 
 #include <QVariant>
+#include <QDebug>
 #include <QDomElement>
 
 Tag* Tag::addChild(const QString tagName, QDomElement* tagDomNode) {
@@ -37,7 +38,16 @@ Tag* Tag::addChild(const QString tagName, QDomElement* tagDomNode) {
 
 bool Tag::removeChild(Tag *child)
 {
-    this->domNode_->removeChild(*child->domNodePointer());
+    QDomNode childDomNode = *child->domNodePointer();
+    QDomNode result = this->domNode_->removeChild(childDomNode);
+    if (this->domNode_->hasChildNodes()) {
+        QDomNodeList children = this->domNode_->childNodes();
+        qDebug() << "There are " << children.size() << " children for Node: " << this->domNode_->nodeName();
+    } else {
+        qDebug() << "There are no children for Node: " << this->domNode_->nodeName();
+    }
+    if (result.isNull())
+        return false;
     return this->children_.removeOne(child);
 }
 
@@ -56,7 +66,6 @@ Tag::~Tag()
     }
 
     children_.clear();
-    // TODO Recursively delete children nodes.
 }
 
 
@@ -130,6 +139,11 @@ Tag* Tag::parent() const {
 QDomElement* Tag::domNodePointer() const
 {
     return this->domNode_;
+}
+
+void Tag::setDomNodePointer(QDomElement* domNode)
+{
+    this->domNode_ = domNode;
 }
 
 int Tag::row() {
