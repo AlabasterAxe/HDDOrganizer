@@ -65,7 +65,14 @@ public:
     // tag on success and 0 on failure.
     Tag* addChild(QString tagName, QDomElement* tagDomNode);
 
+    //
+    void addChild(Tag* child);
+
+    void addChildren(QList<Tag*> tags);
+
     bool removeChild(Tag* child);
+
+    bool removeChildren(QList<Tag*> tags);
 
     // Appends files to the internal list of files as well as the
     // matching DOM node. This function is used for drag and drop
@@ -92,6 +99,8 @@ public:
 
     // Returns a pointer to the parent of the current node.
     Tag* parent() const;
+
+    void setParent(Tag* parent);
 
     // Return the internal DOM pointer.
     QDomElement* domNodePointer() const;

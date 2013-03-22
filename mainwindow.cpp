@@ -25,7 +25,7 @@
 #include "tagnamedialog.h"
 
 #include <QFileDialog>
-#include <QFileSystemModel>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -141,7 +141,6 @@ void MainWindow::recalculate() {
     QModelIndexList selection = this->ui->treeView->selectionModel()->selectedIndexes();
     this->drive_->recalculate(selection);
 }
-
 
 void MainWindow::sortTableByColumn(int column, Qt::SortOrder order)
 {

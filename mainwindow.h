@@ -24,12 +24,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QModelIndex>
 
 class QFileSystemModel;
 class Drive;
 class NotificationDialog;
 class TagNameDialog;
-class QModelIndex;
 
 namespace Ui {
 class MainWindow;

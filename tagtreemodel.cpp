@@ -18,6 +18,7 @@
 
 #include "tagtreemodel.h"
 #include "tag.h"
+#include "tagmimedata.h"
 
 #include <iostream>
 #include <QMimeData>
@@ -65,9 +66,6 @@ void TagTreeModel::translate(QDomElement * domNode, Tag * tagNode) {
 QModelIndex TagTreeModel::index(int row, int column, const QModelIndex & parent) const {
 
     if (!hasIndex(row, column, parent))
-        return QModelIndex();
-
-    if (parent.isValid() && parent.column() != 0)
         return QModelIndex();
 
     Tag* parentTag;
@@ -142,7 +140,6 @@ QModelIndex TagTreeModel::parent(const QModelIndex & child) const {
        return QModelIndex();
     }
 
-    //qDebug() << childTag->data(0);
     return createIndex(parentTag->row(), 0, parentTag);
 }
 
@@ -174,7 +171,6 @@ bool TagTreeModel::insertTag(const QString tagName, const QModelIndex& parent) {
     bool result;
 
     QDomElement tagDomNode = this->domTree_->createElement(tagName);
-    qDebug() << parentDomNode->nodeName();
     QDomElement* tagDomNodePointer = new QDomElement(tagDomNode);
 
     beginInsertRows(parent, position, position);
@@ -194,7 +190,6 @@ bool TagTreeModel::deleteTag(const QModelIndex &tag)
         Tag* tagPointer = this->getIndexTag(tag);
         Tag* tagParent = tagPointer->parent();
         if (tagParent == this->root_)
-            qDebug() << "Yay";
         beginRemoveRows(tag.parent(),tag.row(),tag.row());
         tagParent->removeChild(tagPointer);
         endRemoveRows();
@@ -217,12 +212,34 @@ Tag* TagTreeModel::getIndexTag(const QModelIndex& index) const {
 }
 
 bool TagTreeModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) {
-    Tag* parentTag = getIndexTag(parent);
 
-    if (parentTag != this->root_)
-        parentTag->addFiles(data->urls());
-    else
+    Tag* newParent = getIndexTag(parent);
+
+    if (data->hasUrls() && newParent != this->root_) {
+        newParent->addFiles(data->urls());
+    } else if (data->hasFormat(QString("text/pointer"))) {
+        const TagMimeData * tagData = qobject_cast<const TagMimeData* >(data);
+        QModelIndex oldParent = tagData->parent();
+        Tag* oldParentTag = getIndexTag(oldParent);
+        QList<QPair<QPair<int,int>, QList<Tag*> > > regions = tagData->regions();
+        QList<Tag*> children = tagData->tags();
+
+        if (oldParentTag != newParent &&
+            !children.contains(newParent)) {
+            for (auto it = regions.begin(); it != regions.end(); ++it) {
+                beginMoveRows(oldParent,
+                              it->first.first,
+                              it->first.second,
+                              parent,
+                              newParent->rowCount());
+                getIndexTag(oldParent)->removeChildren(it->second);
+                newParent->addChildren(it->second);
+                endMoveRows();
+            }
+        }
+    } else {
         return false;
+    }
 
     return true;
 }
@@ -256,15 +273,51 @@ bool TagTreeModel::setContent(QIODevice *dev)
     QDomElement* domRootElement = new QDomElement(this->domTree_->firstChild().toElement());
     this->domTreeRoot_ = domRootElement;
 
-    if (this->domTreeRoot_->hasChildNodes()) {
-        QDomNodeList children = this->domTreeRoot_->childNodes();
-        qDebug() << "There are " << children.size() << " children for Node: " << this->domTreeRoot_->nodeName();
-    } else {
-        qDebug() << "There are no children for Node: " << this->domTreeRoot_->nodeName();
-    }
-
     this->root_->setDomNodePointer(this->domTreeRoot_);
     this->translate(this->domTreeRoot_, this->root_);
 
     return result;
+}
+
+QMimeData* TagTreeModel::mimeData(const QModelIndexList &indexes) const
+{
+    QList<Tag*> tags;
+    QList<Tag*> allTags;
+    QModelIndex* parent = 0;
+    TagMimeData* data = new TagMimeData();
+    int start = -2;
+    int end = -2;
+    for (auto it = indexes.begin(); it != indexes.end(); ++it) {
+        if (it->column() == 0) {
+            Tag* tag = this->getIndexTag(*it);
+            if (!parent) {
+                parent = &it->parent();
+            } else if (*parent != it->parent()) {
+                return new QMimeData();
+            }
+
+            if(it->row() == end+1)
+                ++end;
+            else {
+                if(it != indexes.begin()) {
+                    data->addRegion(start, end, tags);
+                    tags.clear();
+                }
+                start = it->row();
+                end = start;
+            }
+            tags << tag;
+            allTags << tag;
+        }
+
+        auto test = it;
+        ++test;
+        if (test == indexes.end())
+            data->addRegion(start, end, tags);
+    }
+
+    data->setData(tr("text/pointer"),QByteArray());
+    data->setTags(allTags);
+    data->setParent(*parent);
+    return data;
 }

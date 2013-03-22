@@ -40,12 +40,6 @@ bool Tag::removeChild(Tag *child)
 {
     QDomNode childDomNode = *child->domNodePointer();
     QDomNode result = this->domNode_->removeChild(childDomNode);
-    if (this->domNode_->hasChildNodes()) {
-        QDomNodeList children = this->domNode_->childNodes();
-        qDebug() << "There are " << children.size() << " children for Node: " << this->domNode_->nodeName();
-    } else {
-        qDebug() << "There are no children for Node: " << this->domNode_->nodeName();
-    }
     if (result.isNull())
         return false;
     return this->children_.removeOne(child);
@@ -68,6 +62,27 @@ Tag::~Tag()
     children_.clear();
 }
 
+void Tag::addChild(Tag* child) {
+    child->setParent(this);
+    this->children_.append(child);
+    this->domNode_->appendChild(*child->domNodePointer());
+}
+
+void Tag::addChildren(QList<Tag*> tags) {
+    for(int i = 0; i < tags.size(); ++i) {
+        this->addChild(tags[i]);
+    }
+}
+
+bool Tag::removeChildren(QList<Tag*> tags) {
+    bool result = false;
+    for(int i = 0; i < tags.size(); ++i) {
+        if (this->removeChild(tags[i])) {
+            result = true;
+        }
+    }
+    return result;
+}
 
 Tag* Tag::child(int row) {
     return this->children_.value(row);
@@ -134,6 +149,11 @@ bool Tag::setData(int column, QVariant value) {
 
 Tag* Tag::parent() const {
     return this->parent_;
+}
+
+void Tag::setParent(Tag *parent)
+{
+    this->parent_ = parent;
 }
 
 QDomElement* Tag::domNodePointer() const

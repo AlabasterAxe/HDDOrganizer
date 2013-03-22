@@ -91,6 +91,7 @@ public:
     // recursively creates the tag tree from a full DOM tree.
     void translate(QDomElement *domNode, Tag *tagNode);
 
+    QMimeData *mimeData(const QModelIndexList &indexes) const;
 private:
     Tag* root_;
     QDomDocument* domTree_;
