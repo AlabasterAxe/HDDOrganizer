@@ -235,7 +235,7 @@ QVariant Drive::headerData ( int section,
     return returnValue;
 }
 
-bool Drive::recalculate(QModelIndexList tags) {
+bool Drive::recalculate(QList<Tag *> tags) {
     if(this->results_.size() > 0) {
         beginRemoveRows(QModelIndex(), 0, this->results_.size()-1);
         this->results_ = QFileInfoList();
@@ -248,15 +248,19 @@ bool Drive::recalculate(QModelIndexList tags) {
         newResults = this->directory_->entryInfoList(QDir::Files);
     } else {
         QString expressionLabel = "";
+        QSet<QString> fileNames = tags[0]->allFiles();
         for (int i = 0; i < tags.size(); i += TAG_TREE_COLUMNS) {
-             Tag* tag = tagTree_->getIndexTag(tags[i]);
-             expressionLabel.append(tag->data(0).toString());
+            expressionLabel.append(tags[i]->data(0).toString());
+            fileNames = fileNames.intersect(tags[i]->allFiles());
 
              if  (i < tags.size() - TAG_TREE_COLUMNS)
                  expressionLabel.append(tr(" &#x2229; "));
         }
         this->parent_->setExpressionLabel(expressionLabel);
-        newResults = this->tagTree_->computeResult(tags);
+
+        for(auto i = fileNames.begin(); i != fileNames.end(); ++i) {
+            newResults.append(QFileInfo(*i));
+        }
     }
 
     if(newResults.size() > 0) {

@@ -45,6 +45,10 @@ bool Tag::removeChild(Tag *child)
     return this->children_.removeOne(child);
 }
 
+Tag::Tag()
+{
+}
+
 Tag::Tag(const QList<QVariant> &data, QDomElement* domNode, Tag *parent)
 {
     this->parent_ = parent;
@@ -128,8 +132,6 @@ bool Tag::addFiles(const QList<QUrl> files) {
 
 bool Tag::setFiles(const QList<QString> files) {
     int fileQuantity = files.size();
-    QString attrName("files");
-    QString fileString;
 
     this->files_.clear();
 
@@ -154,6 +156,20 @@ Tag* Tag::parent() const {
 void Tag::setParent(Tag *parent)
 {
     this->parent_ = parent;
+}
+
+bool Tag::isExpression()
+{
+    return false;
+}
+
+bool Tag::isImplicit()
+{
+    return false;
+}
+
+void Tag::setImplicity(bool implicity)
+{
 }
 
 QDomElement* Tag::domNodePointer() const

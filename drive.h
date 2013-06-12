@@ -41,6 +41,7 @@
 class QDir;
 class QAction;
 class TagTreeModel;
+class Tag;
 class MainWindow;
 
 class Drive : public QAbstractTableModel
@@ -72,7 +73,7 @@ public:
 
     // Computes the result list based on the tags that are selected in the
     // TagTreeView.
-    bool recalculate(QModelIndexList tags);
+    bool recalculate(QList<Tag *> tags);
 
     // Redefine Q
     void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);

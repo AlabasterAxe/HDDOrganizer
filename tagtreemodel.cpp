@@ -34,6 +34,7 @@ TagTreeModel::TagTreeModel(QString name, QObject *parent) :
     QDomElement domRootElement = this->domTree_->createElement(QString("tags"));
     this->domTree_->appendChild(domRootElement);
     this->domTreeRoot_ = new QDomElement(domRootElement);
+    this->domTreeRoot_->setAttribute(QString("version"),QString("0.4"));
     // initialize the root node with the titles of the columns for the tree view
     QList<QVariant> data;
     data << "Tag" << "# of Files";
@@ -53,14 +54,13 @@ void TagTreeModel::translate(QDomElement * domNode, Tag * tagNode) {
     int numChildren = domChildren.size();
     for (int i = 0; i < numChildren; ++i) {
         QDomElement* child = new QDomElement(domChildren.item(i).toElement());
-        Tag* childTag = tagNode->addChild(child->nodeName(), child);
+        Tag* childTag = tagNode->addChild(child->attribute(QString("name")), child);
         this->translate(child, childTag);
     }
 
     QString fileString = domNode->attribute(QString("files"));
     QStringList filesList = fileString.split(QChar('|'), QString::SkipEmptyParts);
     tagNode->setFiles(filesList);
-
 }
 
 QModelIndex TagTreeModel::index(int row, int column, const QModelIndex & parent) const {
@@ -170,8 +170,9 @@ bool TagTreeModel::insertTag(const QString tagName, const QModelIndex& parent) {
     int position = parentTag->rowCount();
     bool result;
 
-    QDomElement tagDomNode = this->domTree_->createElement(tagName);
+    QDomElement tagDomNode = this->domTree_->createElement(QString("tag"));
     QDomElement* tagDomNodePointer = new QDomElement(tagDomNode);
+    tagDomNodePointer->setAttribute(QString("name"),tagName);
 
     beginInsertRows(parent, position, position);
     QDomNode newDomNode = parentDomNode->appendChild(tagDomNode);
@@ -244,22 +245,15 @@ bool TagTreeModel::dropMimeData(const QMimeData* data, Qt::DropAction action, in
     return true;
 }
 
-QList<QFileInfo> TagTreeModel::computeResult(QModelIndexList tags) const {
-    if (tags.size() < 1)
-        return QList<QFileInfo>();
+QList<Tag *> TagTreeModel::getTagList(QModelIndexList indicies) {
+    QList<Tag *> res;
 
-    QSet<QString> first = getIndexTag(tags[0])->allFiles();
+    int indexQuantity = indicies.size();
+    for(int i = 0; i < indexQuantity; ++i ) {
+        res.append(getIndexTag(indicies[i]));
+    }
 
-    int tagQuantity = tags.size();
-    for (int i = 1; i < tagQuantity; ++i)
-        first = first.intersect(getIndexTag(tags[i])->allFiles());
-
-    QList<QFileInfo> files;
-
-    for (auto i = first.begin(); i != first.end(); ++i)
-        files.append(QFileInfo(*i));
-
-    return files;
+    return res;
 }
 
 QString TagTreeModel::stringify() const {
@@ -269,9 +263,19 @@ QString TagTreeModel::stringify() const {
 bool TagTreeModel::setContent(QIODevice *dev)
 {
     QString error;
-    bool result = this->domTree_->setContent(dev, &error);
-    QDomElement* domRootElement = new QDomElement(this->domTree_->firstChild().toElement());
-    this->domTreeRoot_ = domRootElement;
+    QDomDocument *fileContents = new QDomDocument("HDDOrganizer");
+    bool result = fileContents->setContent(dev, &error);
+    QDomElement *fileRoot = new QDomElement(fileContents->firstChild().toElement());
+
+    if(fileRoot->attribute(QString("version")) == "") {
+        return false;
+    }
+
+    delete this->domTree_;
+    delete this->domTreeRoot_;
+
+    this->domTree_ = fileContents;
+    this->domTreeRoot_ = fileRoot;
 
     this->root_->setDomNodePointer(this->domTreeRoot_);
     this->translate(this->domTreeRoot_, this->root_);

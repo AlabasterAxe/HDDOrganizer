@@ -79,9 +79,6 @@ public:
     // Defines the response to having data dropped in the associated view.
     bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent);
 
-    // returns the intersection of the list of tags in a file info list.
-    QList<QFileInfo> computeResult(QModelIndexList tags) const;
-
     // represents the DOM tree as a string.
     QString stringify() const;
 
@@ -92,6 +89,9 @@ public:
     void translate(QDomElement *domNode, Tag *tagNode);
 
     QMimeData *mimeData(const QModelIndexList &indexes) const;
+
+    // Translates a list of QModelIndicies into Tag*s
+    QList<Tag *> getTagList(QModelIndexList indicies);
 private:
     Tag* root_;
     QDomDocument* domTree_;

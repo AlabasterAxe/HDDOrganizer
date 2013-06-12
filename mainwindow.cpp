@@ -20,12 +20,15 @@
 #include "ui_mainwindow.h"
 #include "drive.h"
 #include "tag.h"
+#include "expression.h"
+#include "operation.h"
 #include "tagtreemodel.h"
 #include "notificationdialog.h"
 #include "tagnamedialog.h"
 
 #include <QFileDialog>
 #include <QDebug>
+#include <QChar>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -48,6 +51,8 @@ MainWindow::MainWindow(QWidget *parent) :
                      this,SLOT(recalculate()));
     QObject::connect(this->ui->treeView,SIGNAL(activated(const QModelIndex)),
                      this,SLOT(recalculate()));
+    QObject::connect(this->ui->lineEdit,SIGNAL(returnPressed()),
+                     this,SLOT(filter()));
     QObject::connect(this->ui->tableView->horizontalHeader(),
                      SIGNAL(sortIndicatorChanged(int, Qt::SortOrder)),
                      this,
@@ -139,11 +144,126 @@ void MainWindow::removeTag() {
 
 void MainWindow::recalculate() {
     QModelIndexList selection = this->ui->treeView->selectionModel()->selectedIndexes();
-    this->drive_->recalculate(selection);
+    QList<Tag*> tagList = this->drive_->tagTree_->getTagList(selection);
+    this->drive_->recalculate(tagList);
+}
+
+void MainWindow::filter()
+{
+    QString str = this->ui->lineEdit->text();
+    qDebug() << str;
+
+    if(str[0].unicode() == '(') {
+      Tag* results = parse(str, this->drive_->tagTree_->getIndexTag(QModelIndex()));
+      if(!results) {
+          return;
+      }
+      QList<Tag*> expression;
+      expression.append(results);
+      this->drive_->recalculate(expression);
+    }
 }
 
 void MainWindow::sortTableByColumn(int column, Qt::SortOrder order)
 {
     this->ui->tableView->sortByColumn(column, order);
     this->ui->tableView->reset();
+}
+
+Tag* MainWindow::parse (QString & str, Tag* parent, Tag* tag1) {
+    Expression* a = new Expression(parent);
+    a->setData(0, str);
+
+    if(!tag1) {
+        str.remove(0,1);
+        tag1 = extractTag(str, parent);
+    } else {
+        tag1->setImplicity(true);
+    }
+
+    a->setFirst(tag1);
+
+    if(str[0] == ')') {
+        a->setOperation(new Unary());
+        return a;
+    }
+
+    Operation* op = extractOperation(str);
+    a->setOperation(op);
+
+    Tag* tag2 = 0;
+    if(a->operation() == ">") {
+        while(tag1->isExpression()) {
+            if(!tag1->isImplicit()) {
+                return 0;
+            }
+            tag1 = static_cast<Expression* >(tag1)->second();
+        }
+        tag2 = extractTag(str, tag1);
+    } else {
+        tag2 = extractTag(str, parent);
+    }
+
+    a->setSecond(tag2);
+
+    if(str[0].unicode() == ')') {
+        str.remove(0,1);
+        return a;
+    } else {
+        return parse(str, parent, a);
+    }
+
+    return 0;
+}
+
+Tag* MainWindow::extractTag(QString & str, Tag* parent) {
+    if (str[0].unicode() == '(') {
+        return parse(str, parent);
+    }
+
+    QString tag = "";
+
+    while(str[0].isLetterOrNumber() || str[0].isSpace()) {
+        tag.append(str[0]);
+        str.remove(0,1);
+    }
+    tag = tag.trimmed();
+
+    Tag* child = 0;
+    for(int i = 0; i < parent->rowCount(); ++i){
+        child = parent->child(i);
+        if (child->data(0).toString() == tag) {
+            break;
+        }
+    }
+
+    return child;
+}
+
+Operation* MainWindow::extractOperation(QString & str) {
+
+    Operation* result = 0;
+    QChar character(str[0]);
+    switch (character.unicode()) {
+        case '>':
+            result = new Expansion();
+            break;
+        case '+':
+            result = new Union();
+            break;
+        case '&':
+            result = new Intersection();
+            break;
+        case '-':
+            result = new Difference();
+            break;
+        default:
+            result = 0;
+
+    }
+    if (result) {
+        result->setName(str[0]);
+    }
+    str.remove(0,1);
+    return result;
 }

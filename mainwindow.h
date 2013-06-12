@@ -25,11 +25,15 @@
 
 #include <QMainWindow>
 #include <QModelIndex>
+#include <QPair>
+#include <QSet>
 
 class QFileSystemModel;
 class Drive;
+class Tag;
 class NotificationDialog;
 class TagNameDialog;
+class Operation;
 
 namespace Ui {
 class MainWindow;
@@ -45,6 +49,9 @@ public:
     ~MainWindow();
     void setExpressionLabel(QString expression);
 
+    Tag * parse(QString &str, Tag *parent, Tag *tag1 = 0);
+    Tag *extractTag(QString &str, Tag *parent);
+    Operation *extractOperation(QString &str);
 private:
     Drive* drive_;
     NotificationDialog* notificationDialog_;
@@ -55,6 +62,7 @@ private slots:
     void addTag();
     void removeTag();
     void recalculate();
+    void filter();
     void sortTableByColumn(int column, Qt::SortOrder order);
 };
 

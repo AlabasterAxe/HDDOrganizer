@@ -42,6 +42,7 @@ public:
     // There is currently no default constructor for a tag
     // but certain functions in QT return an uninitialized object
     // as an effective false.
+    Tag();
     Tag(const QList<QVariant> &data, QDomElement* domNode = 0, Tag *parent = 0);
 
     ~Tag();
@@ -95,23 +96,29 @@ public:
 
     // Recursively compiles all of the unique files from the
     // children nodes and returns them in a set.
-    QSet<QString> allFiles();
+    virtual QSet<QString> allFiles();
 
     // Returns a pointer to the parent of the current node.
     Tag* parent() const;
 
     void setParent(Tag* parent);
 
+    virtual bool isExpression();
+
+    virtual bool isImplicit();
+
+    virtual void setImplicity(bool implicity);
+
     // Return the internal DOM pointer.
     QDomElement* domNodePointer() const;
 
     void setDomNodePointer(QDomElement *domNode);
-private:
-    QList<Tag*> children_;
+protected:
     Tag* parent_;
     QDomElement* domNode_;
     QSet<QString> files_;
     QList<QVariant> data_;
+    QList<Tag*> children_;
 };
 
 #endif // TAG_H
